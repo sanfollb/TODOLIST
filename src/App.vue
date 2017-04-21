@@ -1,11 +1,15 @@
 <template>
   <div id="app">
     <h1 v-text="title" class="titled"></h1>
-    <input v-model="newItem" v-on:keyup.enter="addNew" placeholder="Do what?">
+    <button v-on:mousedown="signUp()" v-on:mouseup="signIn(items)">查看todos list</button>
+    <button v-on:click="deletAll()">删除全部</button>
+    <input v-model="newItem" class="inputbox" v-on:keyup.enter="addNew" placeholder="Do what?">
     <ul>
-      <li v-for="item in items" v-bind:class="[{finish:item.isFinish},'lis']"
-      v-on:click="toggleFinish(item)">
-        {{item.label}} &nbsp;<p class="item-status" v-if="item.isFinish">finished</p><span v-html="des"></span>
+      <li v-for="item in items">
+      <input type="checkbox" v-on:click="toggleFinish(item)" class="lis" name="mst">
+      <h3 v-bind:class="{finish:item.isFinish}">{{item.label}}</h3>
+      <p class="item-status" v-if="item.isFinish" v-bind:class="{finish:item.isFinish}">finished</p>
+      <span v-html="des" v-on:click="delet(item)" class="del"></span>
       </li>
     </ul>
   </div>
@@ -18,11 +22,11 @@ export default {
 data () {
     return {
       title: 'Todos list',
-      items: Store.fetch(),
+      items: [],
       newItem:"",
       des:'<span>delete</span>'
     }
-  },
+  }, 
   watch:{
    items:{
     handler(items){
@@ -38,15 +42,37 @@ data () {
     addNew:function(){
       this.items.push({
       label:this.newItem ,
-      isFinish:false
+      isFinish:false 
      })
       this.newItem = ""
     },
+    signUp:function(){
+      this.items=Store.fetch()
+    },
+
+    signIn:function(items){    
+    var sss=items.length
+    var syt=document.getElementsByName("mst")
+    for(var i=0;i<sss;i++){
+      if(items[i].isFinish){
+        syt[i].checked=true
+    }
+  }
+    },
+    deletAll:function(){
+      this.items=[]
+    },
+    delet:function(item){
+      var index=this.items.indexOf(item)
+      this.items.splice(index,1)
+      Store.deletsa(index)
+    }
   }
 }
 </script>
 
 <style>
+
 *{
   margin: 0;
   padding: 0;
@@ -65,51 +91,59 @@ body {
   width: 100%;
   text-align: center;
 }
-
+/* app组件 */
 #app {
   color: #2c3e50;
   font-family: Source Sans Pro, Helvetica, sans-serif;
   width: 70%;
-  height: 600px;
-  position:relative;
-  top:-80px;
+  height: 70%;
+  position: relative;
+  top: 0px;
   text-align: left;
-  padding-left:30px;
 }
+/*list完成后添加删除线样式 */
 .finish{
   text-decoration: line-through;
-}
-.lis{
-  cursor: pointer;
 }
 #app .titled{
   position: absolute;
   top: -50px;
 }
-#app input{
+.inputbox{
   width: 100%;
   height: 30px;
   margin-bottom: 20px;
 }
+
+.lis{
+  cursor: pointer;
+  
+}
 ul{
   text-align: left;
-  list-style: circle;
+  list-style: none;
   line-height: 40px;
-  margin-left: 30px;
 }
 li{
   font-size: 20px;
   font-weight: bold;
+  display: block;
 }
-p,span{
+p,.del{
   display: none;
 }
-li:hover span{
+h3{
+  display: inline;
+}
+li:hover .del{
 display: inline;
 text-decoration: underline;
 font-size: 12px;
 color: grey;
 cursor: pointer;
+}
+button{
+  cursor: pointer;
 }
 .item-status{
   display: inline;
